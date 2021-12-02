@@ -166,6 +166,11 @@ fn read_things(reply: &RepliesClass) -> Vec<String> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let log_dir = format!("{}/.bottalks/", home::home_dir().unwrap().display());
+    std::fs::create_dir_all(&log_dir).unwrap();
+    let path = format!("{}/.env", log_dir);
+    dotenv::from_path(path).unwrap();
+
     let mut log = LogDataBuilder::new();
     let start_time = Instant::now();
     //make it once for performance improvements
