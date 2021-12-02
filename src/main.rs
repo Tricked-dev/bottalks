@@ -1,3 +1,4 @@
+use crate::reddit_objects::RepliesUnion;
 use chrono::{Local, Utc};
 use reddit_objects::{NewestJson, PostData, RepliesClass};
 use roux::Reddit;
@@ -7,10 +8,10 @@ use rust_bert::{
     resources::{RemoteResource, Resource},
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde_json::{json, Value};
 use std::{collections::HashMap, thread::spawn, time::Instant};
+use substring::Substring;
 use tch::Device;
-
-use crate::reddit_objects::RepliesUnion;
 
 mod reddit_objects;
 
@@ -236,6 +237,26 @@ async fn main() -> anyhow::Result<()> {
 
     //Write to ~/.bottalks/logs/<log>
     log.log();
+    let data: Value = json!({
+        "embeds": [
+            {
+                "description": &desc.substring(0,1999),
+                "title": &title.substring(0,50),
+                "url": "https://reddit.com/r/bottalks",
+                "color": 0x1345c3,
+                "footer": {
+                    "text": "r/bottalks is a project a project that uses ai to generate random text daily",
+                },
+            },
+        ],
+    });
+    client
+        .post(dotenv::var("WEBHOOK").unwrap())
+        .header("Content-Type", "application/json")
+        .body(data.to_string())
+        .send()
+        .await?;
+
     Ok(())
 }
 
